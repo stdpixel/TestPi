@@ -9,6 +9,8 @@
 #define MPU6050_WHO_AM_I_BIT        6
 #define MPU6050_WHO_AM_I_LENGTH     6
 
+#include <stdint.h>
+
 class MPU6050
 {
 public:
