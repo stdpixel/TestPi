@@ -1,7 +1,0 @@
-#ifndef GLOBAL_H_
-#define GLOBAL_H_
-
-#define testpi_VERSION_MAJOR @testpi_VERSION_MAJOR@
-#define testpi_VERSION_MINOR @testpi_VERSION_MINOR@
-
-#endif /* GLOBAL_H_ */

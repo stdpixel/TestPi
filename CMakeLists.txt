@@ -26,10 +26,10 @@ set(SOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
 )
 
-configure_file (
- 	"${PROJECT_SOURCE_DIR}/lib/global.h.in"
- 	"${PROJECT_BINARY_DIR}/lib/global.h"
-)
+# configure_file (
+#  	"${PROJECT_SOURCE_DIR}/lib/global.h.in"
+#  	"${PROJECT_BINARY_DIR}/lib/global.h"
+# )
 
 include_directories(
 	"${PROJECT_SOURCE_DIR}/lib"

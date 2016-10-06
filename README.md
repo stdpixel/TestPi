@@ -46,5 +46,7 @@ Links
 =====
 
 [I2C Installation & Konfiguration][1]
+[Interfacing RaspberryPi and MPU-6050][2]
 
 [1]: http://www.netzmafia.de/skripten/hardware/RasPi/RasPi_I2C.html
+[2]: http://blog.bitify.co.uk/2013/11/interfacing-raspberry-pi-and-mpu-6050.html

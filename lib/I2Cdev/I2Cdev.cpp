@@ -37,7 +37,7 @@ void I2Cdev::initialize() {
   bcm2835_i2c_set_baudrate( i2c_baudrate  );
 }
 
-/** Enable or disable I2C, 
+/** Enable or disable I2C,
  * @param isEnabled true = enable, false = disable
  */
 void I2Cdev::enable(bool isEnabled) {
@@ -65,7 +65,8 @@ int8_t I2Cdev::readBit(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint8_t
   bcm2835_i2c_setSlaveAddress(devAddr);
   sendBuf[0] = regAddr;
   uint8_t response = bcm2835_i2c_write_read_rs(sendBuf, 1, recvBuf, 1);
-  *data = recvBuf[1] & (1 << bitNum);
+  *data = recvBuf[0] & (1 << bitNum);
+  *data >>= bitNum;
   return response == BCM2835_I2C_REASON_OK ;
 }
 
