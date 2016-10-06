@@ -35,13 +35,12 @@ THE SOFTWARE.
 #include <stdlib.h> // required for MPU6060
 #include <string.h> // required for MPU6060
 
-
-#define set_I2C_pins  false  
-/* used to boolean for setting RPi I2C pins P1-03 (SDA) and P1-05 (SCL) to alternate function ALT0, which enables those pins for I2C interface. 
+#define set_I2C_pins  false
+/* used to boolean for setting RPi I2C pins P1-03 (SDA) and P1-05 (SCL) to alternate function ALT0, which enables those pins for I2C interface.
    setI2Cpin should be false, if the I2C are already configured in alt mode ... */
 
 #define i2c_baudrate 400000
-//uint32_t i2c_baudrate = 400000 ; //400 kHz, 
+//uint32_t i2c_baudrate = 400000 ; //400 kHz,
 
 class I2Cdev {
  public:

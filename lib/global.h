@@ -1,6 +1,8 @@
 #ifndef GLOBAL_H_
 #define GLOBAL_H_
 
+#include <string.h>
+
 const char *toBin(int x)
 {
   static char b[9];
