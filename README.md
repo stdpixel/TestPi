@@ -6,6 +6,13 @@ This project is an experiment.
 Requirements
 ============
 
+Install development tools
+-------------------------
+
+```bash
+sudo apt-get install i2c-dev i2c-tools wiringpi cmake
+```
+
 Install library for Broadcom BCM 2835
 -------------------------------------
 
@@ -17,10 +24,6 @@ make
 sudo make isntall
 ```
 
-```bash
-sudo apt-get install i2c-dev i2c-tools wiringpi cmake
-```
-
 Build
 =====
 
@@ -29,3 +32,19 @@ cd build
 cmake ..
 make
 ```
+
+Run
+===
+
+Run with sudo from build folder!!
+
+```bash
+sudo ./testpi
+```
+
+Links
+=====
+
+[I2C Installation & Konfiguration][1]
+
+[1]: http://www.netzmafia.de/skripten/hardware/RasPi/RasPi_I2C.html
