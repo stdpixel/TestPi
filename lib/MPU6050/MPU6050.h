@@ -6,9 +6,6 @@
 
 #define MPU6050_RA_WHO_AM_I         0x75
 
-#define MPU6050_WHO_AM_I_BIT        6
-#define MPU6050_WHO_AM_I_LENGTH     6
-
 #include <stdint.h>
 
 class MPU6050
