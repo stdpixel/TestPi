@@ -45,6 +45,7 @@ void setup()
   printf("Gyro range: 0x0%i\n", mpu6050.getFullScaleGyroRange());
   printf("Accel range: 0x0%i\n", mpu6050.getFullScaleAccelRange());
   printf("\n");
+  delay(3000);
 }
 
 void loop()
@@ -60,5 +61,5 @@ void loop()
   printf("YG: %i\n", yg);
   printf("ZG: %i\n\n", zg);
 
-  delay(1000);
+  delay(50);
 }
