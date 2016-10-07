@@ -10,6 +10,8 @@
 #define MPU6050_RA_SELF_TEST_A      0x10  //[5:4] XA_TEST[1-0], [3:2] YA_TEST[1-0], [1:0] ZA_TEST[1-0]
 #define MPU6050_RA_GYRO_CONFIG      0x1B
 #define MPU6050_RA_ACCEL_CONFIG     0x1C
+#define MPU6050_RA_ACCEL_XOUT_H     0x3B
+#define MPU6050_RA_GYRO_XOUT_H      0x43
 #define MPU6050_RA_PWR_MGMT_1       0x6B
 #define MPU6050_RA_WHO_AM_I         0x75
 
@@ -48,11 +50,13 @@ public:
   uint8_t getFullScaleGyroRange();
   void setGyroSelfTestEnabled();
   uint8_t getGyroSelfTestEnabled(uint8_t *x, uint8_t *y, uint8_t *z, uint8_t *r);
+  uint8_t readGyroData(int16_t *x, int16_t *y, int16_t *z);
 
   void setFullScaleAccelRange(uint8_t range);
   uint8_t getFullScaleAccelRange();
   void setAccelSelfTestEnabled();
   uint8_t getAccelSelfTestEnabled(uint8_t *x, uint8_t *y, uint8_t *z, uint8_t *r);
+  uint8_t readAccelData(int16_t *x, int16_t *y, int16_t *z);
 
   void getSelfTestFactoryTrim(float *data);
 

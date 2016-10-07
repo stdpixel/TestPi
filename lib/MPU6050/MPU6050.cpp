@@ -68,6 +68,19 @@ uint8_t MPU6050::getGyroSelfTestEnabled(uint8_t *x, uint8_t *y, uint8_t *z, uint
   return count;
 }
 
+uint8_t MPU6050::readGyroData(int16_t *x, int16_t *y, int16_t *z)
+{
+  uint8_t buffer[6], count;
+  if ((count = I2Cdev::readBytes(_devAddr, MPU6050_RA_GYRO_XOUT_H, 6, buffer)) != 0) // Read 6 raw registers as fast as possible
+  {
+    *x = (int16_t)((buffer[0] << 8) | buffer[1]); // Combine MSB and LSB into signed 16-bit value
+    *y = (int16_t)((buffer[2] << 8) | buffer[3]);
+    *z = (int16_t)((buffer[4] << 8) | buffer[5]);
+  }
+
+  return count;
+}
+
 void MPU6050::setFullScaleAccelRange(uint8_t range)
 {
   I2Cdev::writeBits(_devAddr, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, range);
@@ -95,6 +108,19 @@ uint8_t MPU6050::getAccelSelfTestEnabled(uint8_t *x, uint8_t *y, uint8_t *z, uin
     *y = (buffer[0] & 0x40) >> 6; // mask 0100 0000
     *z = (buffer[0] & 0x20) >> 5; // mask 0010 0000
     *r = (buffer[0] & 0x18) >> 3; // mask 0001 1000
+  }
+
+  return count;
+}
+
+uint8_t MPU6050::readAccelData(int16_t *x, int16_t *y, int16_t *z)
+{
+  uint8_t buffer[6], count;
+  if ((count = I2Cdev::readBytes(_devAddr, MPU6050_RA_ACCEL_XOUT_H, 6, buffer)) != 0) // Read 6 raw registers as fast as possible
+  {
+    *x = (int16_t)((buffer[0] << 8) | buffer[1]); // Combine MSB and LSB into signed 16-bit value
+    *y = (int16_t)((buffer[2] << 8) | buffer[3]);
+    *z = (int16_t)((buffer[4] << 8) | buffer[5]);
   }
 
   return count;
