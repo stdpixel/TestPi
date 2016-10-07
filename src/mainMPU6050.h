@@ -13,10 +13,12 @@ void setup()
       delay(1000);
     }
   }
+
   mpu6050.setSleepEnabled(false);
   mpu6050.setGyroSelfTestEnabled();
   mpu6050.setAccelSelfTestEnabled();
   delay(250);
+
   // mpu6050.setFullScaleGyroRange(MPU6050_GYRO_FS_250);
   // mpu6050.setFullScaleAccelRange(MPU6050_ACCEL_FS_8);
 
@@ -30,11 +32,14 @@ void setup()
   // printf("z-axis self test: gyration trim within: %f of factory value\n", selfTest[5]);
 
   if(selfTest[0] < 1.0f && selfTest[1] < 1.0f && selfTest[2] < 1.0f && selfTest[3] < 1.0f && selfTest[4] < 1.0f && selfTest[5] < 1.0f)
-    printf("Self test: PASS");
+    printf("Self test: PASS\n");
   else
-    printf("Self test: FAILED");
+    printf("Self test: FAILED\n");
 
-  printf("\n========= CONFIG =========\n");
+  // TODO: Calibrate here
+  // TODO: Initialize here
+
+  printf("========= CONFIG =========\n");
   printf("DeviceId: 0x%0x\n", mpu6050.getDeviceId());
   printf("Sleep enabled: %s\n", mpu6050.isSleepEnabled() ? "YES" : "NO");
   printf("Gyro range: 0x0%i\n", mpu6050.getFullScaleGyroRange());
