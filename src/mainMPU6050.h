@@ -54,12 +54,8 @@ void loop()
   mpu6050.readAccelData(&xa, &ya, &za);
   mpu6050.readGyroData(&xg, &yg, &zg);
 
-  printf("XA: %i\n", xa);
-  printf("YA: %i\n", ya);
-  printf("ZA: %i\n", za);
-  printf("XG: %i\n", xg);
-  printf("YG: %i\n", yg);
-  printf("ZG: %i\n\n", zg);
+  printf("XA(%i) YA(%i) ZA(%i) -- XG(%i) YG(%i) ZG(%i)\r", xa, ya, za, xg, yg, zg);
+  fflush(stdout);
 
-  delay(50);
+  delay(100);
 }
