@@ -76,6 +76,7 @@ uint8_t MPU6050::readGyroData(int16_t *x, int16_t *y, int16_t *z)
     *x = (int16_t)((buffer[0] << 8) | buffer[1]); // Combine MSB and LSB into signed 16-bit value
     *y = (int16_t)((buffer[2] << 8) | buffer[3]);
     *z = (int16_t)((buffer[4] << 8) | buffer[5]);
+
   }
 
   return count;
@@ -96,6 +97,11 @@ uint8_t MPU6050::getFullScaleAccelRange()
 void MPU6050::setAccelSelfTestEnabled()
 {
   I2Cdev::writeByte(_devAddr, MPU6050_RA_ACCEL_CONFIG, 0xF0); // Enable self test on all three axes and set accelerometer range to +/- 8 g
+}
+
+void MPU6050::LDByteWriteI2C(int16_t adress, int16_t config, int16_t data)
+{
+  I2Cdev::writeByte(adress, config, data); // Enable self test on all three axes and set accelerometer range to +/- 8 g
 }
 
 uint8_t MPU6050::getAccelSelfTestEnabled(uint8_t *x, uint8_t *y, uint8_t *z, uint8_t *r)
@@ -125,6 +131,32 @@ uint8_t MPU6050::readAccelData(int16_t *x, int16_t *y, int16_t *z)
 
   return count;
 }
+
+void MPU6050::Calibrate_Gyros( float *GYRO_XOUT_OFFSET,float *GYRO_YOUT_OFFSET,float *GYRO_ZOUT_OFFSET)
+{
+  int i =0;
+  int16_t x,y,z;
+  float GYRO_XOUT_OFFSET_1000SUM;
+  float GYRO_YOUT_OFFSET_1000SUM;
+  float GYRO_ZOUT_OFFSET_1000SUM;
+  for(i = 0; i<1000; i++)
+  {
+    MPU6050::readGyroData(&x,  &y, &z);
+    
+    GYRO_XOUT_OFFSET_1000SUM += (float)x;
+    GYRO_YOUT_OFFSET_1000SUM += (float)y;
+    GYRO_ZOUT_OFFSET_1000SUM += (float)z;
+    
+    delay(1);
+  } 
+   *GYRO_XOUT_OFFSET = GYRO_XOUT_OFFSET_1000SUM/1000.0;
+   *GYRO_YOUT_OFFSET = GYRO_YOUT_OFFSET_1000SUM/1000.0;
+   *GYRO_ZOUT_OFFSET = GYRO_ZOUT_OFFSET_1000SUM/1000.0;
+  
+  //printf("\nGyro X offset sum: %ld Gyro X offset: %d", GYRO_XOUT_OFFSET_1000SUM, GYRO_XOUT_OFFSET);
+  //printf("\nGyro Y offset sum: %ld Gyro Y offset: %d", GYRO_YOUT_OFFSET_1000SUM, GYRO_YOUT_OFFSET);
+  //printf("\nGyro Z offset sum: %ld Gyro Z offset: %d", GYRO_ZOUT_OFFSET_1000SUM, GYRO_ZOUT_OFFSET);
+} 
 
 void MPU6050::getSelfTestFactoryTrim(float *data)
 {
