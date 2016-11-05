@@ -1,19 +1,33 @@
 #include "MPU6050.h"
 
-#include <I2Cdev/I2Cdev.h>
+#include <I2C/I2C.h>
 #include <stdio.h>
+#include <math.h>
+#include <wiringPi.h>
 
-MPU6050::MPU6050(uint8_t devAddr) : _devAddr(devAddr)
+MPU6050::MPU6050(uint8_t devAddr) : _devAddr(devAddr), _i2c(devAddr)
 {}
+
+void MPU6050::initialize()
+{
+  _i2c.writeByte(MPU6050_RA_FIFO_EN, 0x70); // Enable FIFO for xg, xy, xz 01110000
+  // _i2c.writeByte(MPU6050_RA_INT_ENABLE, 0x11); // Enable interrupt for FIFO and DATA_READY 00010001
+  _i2c.writeByte(MPU6050_RA_INT_ENABLE, 0x00); // Disable interrupt
+  _i2c.writeByte(MPU6050_RA_INT_PIN_CFG, 0x02); // Enable Hardware Interrupt
+
+  setGyroSelfTestEnabled(false);
+  setAccelSelfTestEnabled(false);
+  setFullScaleGyroRange(MPU6050_GYRO_FS_250);
+  setFullScaleAccelRange(MPU6050_ACCEL_FS_8);
+  setSleepEnabled(false);
+}
 
 uint8_t MPU6050::getDeviceId()
 {
   uint8_t buffer, deviceId;
 
-  if (I2Cdev::readByte(_devAddr, MPU6050_RA_WHO_AM_I, &buffer) != 0)
-  {
-    deviceId = (buffer & 0x7E) >> 1; // mask 0111 1110
-  }
+  _i2c.readByte(MPU6050_RA_WHO_AM_I, &buffer);
+  deviceId = (buffer & 0x7E) >> 1;
 
   return deviceId;
 }
@@ -25,45 +39,43 @@ bool MPU6050::isConnected()
 
 void MPU6050::setSleepEnabled(bool enabled)
 {
-  I2Cdev::writeBit(_devAddr, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_SLEEP_BIT, enabled);
+  _i2c.writeBit(MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_SLEEP_BIT, enabled);
 }
 
 uint8_t MPU6050::isSleepEnabled()
 {
   uint8_t buffer;
-  I2Cdev::readBit(_devAddr, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_SLEEP_BIT, &buffer);
-
+  _i2c.readBit(MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_SLEEP_BIT, &buffer);
   return buffer;
 }
 
 void MPU6050::setFullScaleGyroRange(uint8_t range)
 {
-  I2Cdev::writeBits(_devAddr, MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH, range);
+  _i2c.writeBits(MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH, range);
 }
 
 uint8_t MPU6050::getFullScaleGyroRange()
 {
   uint8_t buffer;
-  I2Cdev::readBits(_devAddr, MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH, &buffer);
+  _i2c.readBits(MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH, &buffer);
   return buffer;
 }
 
-void MPU6050::setGyroSelfTestEnabled()
+void MPU6050::setGyroSelfTestEnabled(bool enabled)
 {
-  I2Cdev::writeByte(_devAddr, MPU6050_RA_GYRO_CONFIG, 0xE0); // Enable self test on all three axes and set gyro range to +/- 250 degrees/s
+  uint8_t data = enabled ? 0x0E : 0x00;
+  _i2c.writeByte(MPU6050_RA_GYRO_CONFIG, data); // Enable self test on all three axes and set gyro range to +/- 250 degrees/s
 }
 
 uint8_t MPU6050::getGyroSelfTestEnabled(uint8_t *x, uint8_t *y, uint8_t *z, uint8_t *r)
 {
   uint8_t buffer[1], count;
+  _i2c.readByte(MPU6050_RA_GYRO_CONFIG, buffer);
 
-  if ((count = I2Cdev::readByte(_devAddr, MPU6050_RA_GYRO_CONFIG, buffer)) != 0)
-  {
-    *x = (buffer[0] & 0x80) >> 7; // mask 1000 0000
-    *y = (buffer[0] & 0x40) >> 6; // mask 0100 0000
-    *z = (buffer[0] & 0x20) >> 5; // mask 0010 0000
-    *r = (buffer[0] & 0x18) >> 3; // mask 0001 1000
-  }
+  *x = (buffer[0] & 0x80) >> 7; // mask 1000 0000
+  *y = (buffer[0] & 0x40) >> 6; // mask 0100 0000
+  *z = (buffer[0] & 0x20) >> 5; // mask 0010 0000
+  *r = (buffer[0] & 0x18) >> 3; // mask 0001 1000
 
   return count;
 }
@@ -71,50 +83,48 @@ uint8_t MPU6050::getGyroSelfTestEnabled(uint8_t *x, uint8_t *y, uint8_t *z, uint
 uint8_t MPU6050::readGyroData(int16_t *x, int16_t *y, int16_t *z)
 {
   uint8_t buffer[6], count;
-  if ((count = I2Cdev::readBytes(_devAddr, MPU6050_RA_GYRO_XOUT_H, 6, buffer)) != 0) // Read 6 raw registers as fast as possible
-  {
-    *x = (int16_t)((buffer[0] << 8) | buffer[1]); // Combine MSB and LSB into signed 16-bit value
-    *y = (int16_t)((buffer[2] << 8) | buffer[3]);
-    *z = (int16_t)((buffer[4] << 8) | buffer[5]);
+  _i2c.readBytes(MPU6050_RA_GYRO_XOUT_H, 6, buffer);
 
-  }
+  *x = (int16_t)((buffer[0] << 8) | buffer[1]); // Combine MSB and LSB into signed 16-bit value
+  *y = (int16_t)((buffer[2] << 8) | buffer[3]);
+  *z = (int16_t)((buffer[4] << 8) | buffer[5]);
 
   return count;
 }
 
 void MPU6050::setFullScaleAccelRange(uint8_t range)
 {
-  I2Cdev::writeBits(_devAddr, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, range);
+  _i2c.writeBits(MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, range);
 }
 
 uint8_t MPU6050::getFullScaleAccelRange()
 {
   uint8_t buffer;
-  I2Cdev::readBits(_devAddr, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, &buffer);
+  _i2c.readBits(MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, &buffer);
   return buffer;
 }
 
-void MPU6050::setAccelSelfTestEnabled()
+void MPU6050::setAccelSelfTestEnabled(bool enabled)
 {
-  I2Cdev::writeByte(_devAddr, MPU6050_RA_ACCEL_CONFIG, 0xF0); // Enable self test on all three axes and set accelerometer range to +/- 8 g
+  uint8_t data = enabled ? 0xF0 : 0x00;
+
+  _i2c.writeByte(MPU6050_RA_ACCEL_CONFIG, data); // Enable self test on all three axes and set accelerometer range to +/- 8 g
 }
 
 void MPU6050::LDByteWriteI2C(int16_t adress, int16_t config, int16_t data)
 {
-  I2Cdev::writeByte(adress, config, data); // Enable self test on all three axes and set accelerometer range to +/- 8 g
+  _i2c.writeByte(config, data); // Enable self test on all three axes and set accelerometer range to +/- 8 g
 }
 
 uint8_t MPU6050::getAccelSelfTestEnabled(uint8_t *x, uint8_t *y, uint8_t *z, uint8_t *r)
 {
   uint8_t buffer[1], count;
+  _i2c.readByte(MPU6050_RA_ACCEL_CONFIG, buffer);
 
-  if ((count = I2Cdev::readByte(_devAddr, MPU6050_RA_ACCEL_CONFIG, buffer)) != 0)
-  {
-    *x = (buffer[0] & 0x80) >> 7; // mask 1000 0000
-    *y = (buffer[0] & 0x40) >> 6; // mask 0100 0000
-    *z = (buffer[0] & 0x20) >> 5; // mask 0010 0000
-    *r = (buffer[0] & 0x18) >> 3; // mask 0001 1000
-  }
+  *x = (buffer[0] & 0x80) >> 7; // mask 1000 0000
+  *y = (buffer[0] & 0x40) >> 6; // mask 0100 0000
+  *z = (buffer[0] & 0x20) >> 5; // mask 0010 0000
+  *r = (buffer[0] & 0x18) >> 3; // mask 0001 1000
 
   return count;
 }
@@ -122,12 +132,11 @@ uint8_t MPU6050::getAccelSelfTestEnabled(uint8_t *x, uint8_t *y, uint8_t *z, uin
 uint8_t MPU6050::readAccelData(int16_t *x, int16_t *y, int16_t *z)
 {
   uint8_t buffer[6], count;
-  if ((count = I2Cdev::readBytes(_devAddr, MPU6050_RA_ACCEL_XOUT_H, 6, buffer)) != 0) // Read 6 raw registers as fast as possible
-  {
-    *x = (int16_t)((buffer[0] << 8) | buffer[1]); // Combine MSB and LSB into signed 16-bit value
-    *y = (int16_t)((buffer[2] << 8) | buffer[3]);
-    *z = (int16_t)((buffer[4] << 8) | buffer[5]);
-  }
+  _i2c.readBytes(MPU6050_RA_ACCEL_XOUT_H, 6, buffer); // Read 6 raw registers as fast as possible
+
+  *x = (int16_t)((buffer[0] << 8) | buffer[1]); // Combine MSB and LSB into signed 16-bit value
+  *y = (int16_t)((buffer[2] << 8) | buffer[3]);
+  *z = (int16_t)((buffer[4] << 8) | buffer[5]);
 
   return count;
 }
@@ -142,21 +151,21 @@ void MPU6050::Calibrate_Gyros( float *GYRO_XOUT_OFFSET,float *GYRO_YOUT_OFFSET,f
   for(i = 0; i<1000; i++)
   {
     MPU6050::readGyroData(&x,  &y, &z);
-    
+
     GYRO_XOUT_OFFSET_1000SUM += (float)x;
     GYRO_YOUT_OFFSET_1000SUM += (float)y;
     GYRO_ZOUT_OFFSET_1000SUM += (float)z;
-    
+
     delay(1);
-  } 
+  }
    *GYRO_XOUT_OFFSET = GYRO_XOUT_OFFSET_1000SUM/1000.0;
    *GYRO_YOUT_OFFSET = GYRO_YOUT_OFFSET_1000SUM/1000.0;
    *GYRO_ZOUT_OFFSET = GYRO_ZOUT_OFFSET_1000SUM/1000.0;
-  
+
   //printf("\nGyro X offset sum: %ld Gyro X offset: %d", GYRO_XOUT_OFFSET_1000SUM, GYRO_XOUT_OFFSET);
   //printf("\nGyro Y offset sum: %ld Gyro Y offset: %d", GYRO_YOUT_OFFSET_1000SUM, GYRO_YOUT_OFFSET);
   //printf("\nGyro Z offset sum: %ld Gyro Z offset: %d", GYRO_ZOUT_OFFSET_1000SUM, GYRO_ZOUT_OFFSET);
-} 
+}
 
 void MPU6050::getSelfTestFactoryTrim(float *data)
 {
@@ -165,16 +174,16 @@ void MPU6050::getSelfTestFactoryTrim(float *data)
   uint8_t selfTest[6];
   float factoryTrim[6];
 
-  I2Cdev::readByte(_devAddr, MPU6050_RA_SELF_TEST_X, buffer);
+  _i2c.readByte(MPU6050_RA_SELF_TEST_X, buffer);
   rawData[0] = buffer[0];
 
-  I2Cdev::readByte(_devAddr, MPU6050_RA_SELF_TEST_Y, buffer);
+  _i2c.readByte(MPU6050_RA_SELF_TEST_Y, buffer);
   rawData[1] = buffer[0];
 
-  I2Cdev::readByte(_devAddr, MPU6050_RA_SELF_TEST_Z, buffer);
+  _i2c.readByte(MPU6050_RA_SELF_TEST_Z, buffer);
   rawData[2] = buffer[0];
 
-  I2Cdev::readByte(_devAddr, MPU6050_RA_SELF_TEST_A, buffer);
+  _i2c.readByte(MPU6050_RA_SELF_TEST_A, buffer);
   rawData[3] = buffer[0];
 
   // Extract the acceleration test results first
@@ -199,4 +208,12 @@ void MPU6050::getSelfTestFactoryTrim(float *data)
   {
     data[i] = 100.0 + 100.0*((float)selfTest[i] - factoryTrim[i])/factoryTrim[i]; // Report percent differences
   }
+}
+
+uint8_t MPU6050::isInterruptTriggered()
+{
+  uint8_t buffer;
+  _i2c.readBit(MPU6050_RA_INT_STATUS, 4, &buffer);
+
+  return buffer;
 }

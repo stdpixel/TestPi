@@ -34,7 +34,7 @@
 #define MPU6050_PWR1_SLEEP_BIT      6
 
 #define MPU6050_FILTER_ARITHMETIC_MIDDLE_COUNT 10
-#define MPU6050_SLEEPTIME 30 
+#define MPU6050_SLEEPTIME 30
 
 //additional defines from 3rd party
 #define MPU6050_ADDRESS 0b11010010 // Address with end write bit
@@ -150,11 +150,14 @@
 #define MPU6050_RA_WHO_AM_I 0x75
 
 #include <stdint.h>
+#include <I2C/I2C.h>
 
 class MPU6050
 {
 public:
   MPU6050(uint8_t devAddr);
+
+  void initialize();
 
   uint8_t getDeviceId();
   bool isConnected();
@@ -164,7 +167,7 @@ public:
 
   void setFullScaleGyroRange(uint8_t range);
   uint8_t getFullScaleGyroRange();
-  void setGyroSelfTestEnabled();
+  void setGyroSelfTestEnabled(bool enabled);
   uint8_t getGyroSelfTestEnabled(uint8_t *x, uint8_t *y, uint8_t *z, uint8_t *r);
   uint8_t readGyroData(int16_t *x, int16_t *y, int16_t *z);
 
@@ -172,15 +175,17 @@ public:
 
   void setFullScaleAccelRange(uint8_t range);
   uint8_t getFullScaleAccelRange();
-  void setAccelSelfTestEnabled();
+  void setAccelSelfTestEnabled(bool enabled);
   uint8_t getAccelSelfTestEnabled(uint8_t *x, uint8_t *y, uint8_t *z, uint8_t *r);
   uint8_t readAccelData(int16_t *x, int16_t *y, int16_t *z);
 
   void getSelfTestFactoryTrim(float *data);
   void Calibrate_Gyros(float *GYRO_XOUT_OFFSET,float *GYRO_YOUT_OFFSET,float *GYRO_ZOUT_OFFSET);
+  uint8_t isInterruptTriggered();
 
 private:
   uint8_t _devAddr;
+  I2C _i2c;
 };
 
 #endif /* MPU6050_H_ */

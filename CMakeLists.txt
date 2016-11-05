@@ -22,7 +22,9 @@ endif()
 
 set(SOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/I2Cdev/I2Cdev.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/I2C/I2C.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/MPU6050/MPU6050.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/SSD1306/SSD1306.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
 )
 
@@ -37,4 +39,4 @@ include_directories(
 
 
 add_executable(testpi ${SOURCE})
-target_link_libraries (testpi bcm2835)
+target_link_libraries (testpi bcm2835 wiringPi)
