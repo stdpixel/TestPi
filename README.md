@@ -44,8 +44,10 @@ Links
 * [Interfacing RaspberryPi and MPU-6050][2]
 * [MPU6050 Datasheet][3]
 * [MPU6050 Register Map][4]
+* [SSD1306 Datasheet][5]
 
 [1]: http://www.netzmafia.de/skripten/hardware/RasPi/RasPi_I2C.html
 [2]: http://blog.bitify.co.uk/2013/11/interfacing-raspberry-pi-and-mpu-6050.html
 [3]: https://dl.dropboxusercontent.com/u/3162461/mcudocs/MPU-6050_DataSheet_V3%204.pdf
 [4]: https://dl.dropboxusercontent.com/u/3162461/mcudocs/RM-MPU-60xxA_rev_4.pdf
+[5]: https://dl.dropboxusercontent.com/u/3162461/mcudocs/SSD1306.pdf
