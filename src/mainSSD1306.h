@@ -18,9 +18,13 @@ public:
   {
     ssd1306.begin(SSD1306_SWITCHCAPVCC);
     ssd1306.display();
-    delay(5000);
+    delay(2000);
+    ssd1306.clearDisplay();
+    ssd1306.drawPixel(10, 10, WHITE);
+    ssd1306.display();
+    delay(2000);
     ssd1306.end();
-    delay(3000);
+    delay(1000);
   }
 };
 

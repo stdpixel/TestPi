@@ -52,6 +52,10 @@
 #define SSD1306_VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL 0x29
 #define SSD1306_VERTICAL_AND_LEFT_HORIZONTAL_SCROLL 0x2A
 
+#define BLACK 0
+#define WHITE 1
+#define INVERSE 2
+
 class SSD1306
 {
 public:
@@ -60,7 +64,9 @@ public:
   void begin(uint8_t vccState);
   void end();
   void ssd1306command(uint8_t cmd);
+  void drawPixel(int16_t x, int16_t y, uint16_t color);
   void display();
+  void clearDisplay();
 
 private:
   uint8_t _devAddr;

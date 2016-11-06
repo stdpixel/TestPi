@@ -1,5 +1,7 @@
 // #include <I2Cdev/I2Cdev.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include "SSD1306.h"
 
 static uint8_t buffer[SSD1306_LCDHEIGHT * SSD1306_LCDWIDTH / 8] = {
@@ -131,6 +133,22 @@ void SSD1306::ssd1306command(uint8_t cmd)
   _i2c.writeByte(0x00, cmd);
 }
 
+void SSD1306::drawPixel(int16_t x, int16_t y, uint16_t color)
+{
+  if ((x < 0) || (x >= SSD1306_LCDWIDTH) || (y < 0) || (y >= SSD1306_LCDHEIGHT))
+    return;
+
+  x = SSD1306_LCDWIDTH - x - 1;
+  y = SSD1306_LCDHEIGHT - y - 1;
+
+  switch (color)
+  {
+    case WHITE:   buffer[x+ (y/8)*SSD1306_LCDWIDTH] |=  (1 << (y&7)); break;
+    case BLACK:   buffer[x+ (y/8)*SSD1306_LCDWIDTH] &= ~(1 << (y&7)); break;
+    case INVERSE: buffer[x+ (y/8)*SSD1306_LCDWIDTH] ^=  (1 << (y&7)); break;
+  }
+}
+
 void SSD1306::display()
 {
   ssd1306command(SSD1306_COLUMNADDR);
@@ -149,4 +167,9 @@ void SSD1306::display()
     }
     i--;
   }
+}
+
+void SSD1306::clearDisplay()
+{
+  memset(buffer, 0, (SSD1306_LCDWIDTH*SSD1306_LCDHEIGHT/8));
 }
