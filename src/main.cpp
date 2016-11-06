@@ -58,10 +58,10 @@ int main(int argc, char *argv[])
 
   if (arguments.device == arguments::MPU6050)
   {
-    MainMPU6050::setup();
+    setupMain_MPU6050();
     while(1)
     {
-      MainMPU6050::loop();
+      loopMain_MPU6050();
     }
   }
 
